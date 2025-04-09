@@ -1,1 +1,12 @@
 /node_modules
+/screenshots
+
+
+captcha_detection.png
+before_captcha.png
+captcha_puzzle.png
+
+
+page_no_ads.html
+page_no_articles.html
+Dockerfile
