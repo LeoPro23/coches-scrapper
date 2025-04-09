@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Buscador de Autocaravanas y Remolques</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            padding-top: 20px;
+        }
+        .search-container {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            padding: 25px;
+            margin-bottom: 30px;
+        }
+        .results-container {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            padding: 25px;
+            display: none;
+        }
+        .loader {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+        }
+        .spinner-border {
+            width: 3rem;
+            height: 3rem;
+        }
+        .result-card {
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            overflow: hidden;
+        }
+        .result-card img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+        .result-card-body {
+            padding: 15px;
+        }
+        .price {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #28a745;
+        }
+        .attributes {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .attribute {
+            background-color: #f8f9fa;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-10">
+                <h1 class="text-center mb-4">Buscador de Autocaravanas y Remolques</h1>
+                
+                <div class="search-container">
+                    <form id="searchForm">
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <label for="vehicleType" class="form-label">Tipo de vehículo</label>
+                                <select class="form-select" id="vehicleType">
+                                    <option value="">Todos</option>
+                                    <option value="3821">Autocaravana</option>
+                                    <option value="3820">Caravana</option>
+                                    <option value="3822">Remolques</option>
+                                </select>
+                            </div>
+                            <div class="col-md-8">
+                                <label for="makeModel" class="form-label">Marca y modelo</label>
+                                <input type="text" class="form-control" id="makeModel" placeholder="Ej: Mercedes Benz, Fiat Ducato...">
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="minPrice" class="form-label">Precio desde</label>
+                                <select class="form-select" id="minPrice">
+                                    <option value="">Sin mínimo</option>
+                                    <option value="1000">1.000 €</option>
+                                    <option value="2000">2.000 €</option>
+                                    <option value="3000">3.000 €</option>
+                                    <option value="4000">4.000 €</option>
+                                    <option value="5000">5.000 €</option>
+                                    <option value="6000">6.000 €</option>
+                                    <option value="7000">7.000 €</option>
+                                    <option value="8000">8.000 €</option>
+                                    <option value="9000">9.000 €</option>
+                                    <option value="10000">10.000 €</option>
+                                    <option value="11000">11.000 €</option>
+                                    <option value="12000">12.000 €</option>
+                                    <option value="13000">13.000 €</option>
+                                    <option value="14000">14.000 €</option>
+                                    <option value="15000">15.000 €</option>
+                                    <option value="16000">16.000 €</option>
+                                    <option value="17000">17.000 €</option>
+                                    <option value="18000">18.000 €</option>
+                                    <option value="19000">19.000 €</option>
+                                    <option value="20000">20.000 €</option>
+                                    <option value="21000">21.000 €</option>
+                                    <option value="22000">22.000 €</option>
+                                    <option value="23000">23.000 €</option>
+                                    <option value="24000">24.000 €</option>
+                                    <option value="25000">25.000 €</option>
+                                    <option value="30000">30.000 €</option>
+                                    <option value="35000">35.000 €</option>
+                                    <option value="40000">40.000 €</option>
+                                    <option value="50000">50.000 €</option>
+                                    <option value="60000">60.000 €</option>
+                                    <option value="70000">70.000 €</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="maxPrice" class="form-label">Precio hasta</label>
+                                <select class="form-select" id="maxPrice">
+                                    <option value="">Sin máximo</option>
+                                    <option value="1000">1.000 €</option>
+                                    <option value="2000">2.000 €</option>
+                                    <option value="3000">3.000 €</option>
+                                    <option value="4000">4.000 €</option>
+                                    <option value="5000">5.000 €</option>
+                                    <option value="6000">6.000 €</option>
+                                    <option value="7000">7.000 €</option>
+                                    <option value="8000">8.000 €</option>
+                                    <option value="9000">9.000 €</option>
+                                    <option value="10000">10.000 €</option>
+                                    <option value="11000">11.000 €</option>
+                                    <option value="12000">12.000 €</option>
+                                    <option value="13000">13.000 €</option>
+                                    <option value="14000">14.000 €</option>
+                                    <option value="15000">15.000 €</option>
+                                    <option value="16000">16.000 €</option>
+                                    <option value="17000">17.000 €</option>
+                                    <option value="18000">18.000 €</option>
+                                    <option value="19000">19.000 €</option>
+                                    <option value="20000">20.000 €</option>
+                                    <option value="21000">21.000 €</option>
+                                    <option value="22000">22.000 €</option>
+                                    <option value="23000">23.000 €</option>
+                                    <option value="24000">24.000 €</option>
+                                    <option value="25000">25.000 €</option>
+                                    <option value="30000">30.000 €</option>
+                                    <option value="35000">35.000 €</option>
+                                    <option value="40000">40.000 €</option>
+                                    <option value="50000">50.000 €</option>
+                                    <option value="60000">60.000 €</option>
+                                    <option value="70000">70.000 €</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="text-center">
+                            <button type="submit" class="btn btn-primary">Buscar</button>
+                            <button type="button" id="searchDirectBtn" class="btn btn-outline-secondary ms-2">Búsqueda en texto libre</button>
+                        </div>
+                    </form>
+                    
+                    <div id="directSearchContainer" class="mt-3" style="display: none;">
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="directSearchInput" placeholder="Escribe tu búsqueda: ej. autocaravana mercedes menos de 40000">
+                            <button class="btn btn-primary" type="button" id="directSearchBtn">Buscar</button>
+                        </div>
+                        <small class="text-muted">Ejemplos: "autocaravana fiat menos de 30000", "caravana ford transit entre 10000 y 50000", "mercedes benz marco polo"</small>
+                    </div>
+                </div>
+                
+                <div class="loader" id="loader">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Cargando...</span>
+                    </div>
+                    <p class="mt-2">Buscando vehículos, por favor espere...</p>
+                </div>
+                
+                <div class="results-container" id="resultsContainer">
+                    <h2 class="mb-4">Resultados de la búsqueda</h2>
+                    <div class="row" id="resultsGrid">
+                        <!-- Aquí se mostrarán dinámicamente los resultados -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchForm = document.getElementById('searchForm');
+            const searchDirectBtn = document.getElementById('searchDirectBtn');
+            const directSearchContainer = document.getElementById('directSearchContainer');
+            const directSearchBtn = document.getElementById('directSearchBtn');
+            const loader = document.getElementById('loader');
+            const resultsContainer = document.getElementById('resultsContainer');
+            const resultsGrid = document.getElementById('resultsGrid');
+            
+            // Mostrar/ocultar búsqueda en texto libre
+            searchDirectBtn.addEventListener('click', function() {
+                directSearchContainer.style.display = directSearchContainer.style.display === 'none' ? 'block' : 'none';
+            });
+            
+            // Manejar búsqueda con formulario
+            searchForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                // Obtener valores del formulario
+                const vehicleType = document.getElementById('vehicleType').value;
+                const makeModel = document.getElementById('makeModel').value;
+                const minPrice = document.getElementById('minPrice').value;
+                const maxPrice = document.getElementById('maxPrice').value;
+                
+                // Construir la consulta en formato natural para enviar a la IA
+                let query = '';
+                
+                if (vehicleType) {
+                    if (vehicleType === '3821') query += 'autocaravana ';
+                    else if (vehicleType === '3820') query += 'caravana ';
+                    else if (vehicleType === '3822') query += 'remolque ';
+                }
+                
+                if (makeModel) {
+                    query += makeModel + ' ';
+                }
+                
+                if (minPrice && maxPrice) {
+                    query += `entre ${minPrice} y ${maxPrice} euros`;
+                } else if (minPrice) {
+                    query += `desde ${minPrice} euros`;
+                } else if (maxPrice) {
+                    query += `hasta ${maxPrice} euros`;
+                }
+                
+                // Si hay una consulta, realizar la búsqueda
+                if (query.trim()) {
+                    performSearch(query.trim());
+                } else {
+                    alert('Por favor, introduce al menos un criterio de búsqueda');
+                }
+            });
+            
+            // Manejar búsqueda directa en texto libre
+            directSearchBtn.addEventListener('click', function() {
+                const directQuery = document.getElementById('directSearchInput').value.trim();
+                if (directQuery) {
+                    performSearch(directQuery);
+                } else {
+                    alert('Por favor, escribe una consulta de búsqueda');
+                }
+            });
+            
+            // Función para realizar la búsqueda
+            function performSearch(query) {
+                // Mostrar loader y ocultar resultados
+                loader.style.display = 'block';
+                resultsContainer.style.display = 'none';
+                resultsGrid.innerHTML = '';
+                
+                // Enviar la consulta al servidor
+                fetch('/search', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ query: query })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    // Ocultar loader
+                    loader.style.display = 'none';
+                    
+                    if (data.success) {
+                        // Mostrar resultados
+                        displayResults(data.data);
+                    } else {
+                        alert('Error al realizar la búsqueda: ' + data.error);
+                    }
+                })
+                .catch(error => {
+                    loader.style.display = 'none';
+                    alert('Error de conexión: ' + error.message);
+                });
+            }
+            
+            // Función para mostrar los resultados
+            function displayResults(results) {
+                if (!results || results.length === 0) {
+                    resultsGrid.innerHTML = '<div class="col-12"><div class="alert alert-warning">No se encontraron resultados para tu búsqueda.</div></div>';
+                } else {
+                    // Mostrar cada resultado en una tarjeta
+                    results.forEach(item => {
+                        const card = document.createElement('div');
+                        card.className = 'col-md-4 mb-4';
+                        
+                        // Formatear los detalles
+                        const detailsHtml = item.details && item.details.length > 0 
+                            ? `<div class="attributes">
+                                ${item.details.map(detail => `<span class="attribute">${detail}</span>`).join('')}
+                               </div>` 
+                            : '';
+                        
+                        card.innerHTML = `
+                            <div class="result-card">
+                                <img src="${item.imageUrl || 'https://via.placeholder.com/300x200?text=Sin+imagen'}" alt="${item.title}">
+                                <div class="result-card-body">
+                                    <h5>${item.title}</h5>
+                                    <p class="price">${item.price}</p>
+                                    <p class="location">${item.location || 'Ubicación no disponible'}</p>
+                                    ${detailsHtml}
+                                    <a href="${item.url}" target="_blank" class="btn btn-sm btn-outline-primary mt-2">Ver anuncio</a>
+                                </div>
+                            </div>
+                        `;
+                        
+                        resultsGrid.appendChild(card);
+                    });
+                }
+                
+                // Mostrar contenedor de resultados
+                resultsContainer.style.display = 'block';
+                
+                // Hacer scroll hacia los resultados
+                resultsContainer.scrollIntoView({ behavior: 'smooth' });
+            }
+        });
+    </script>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
