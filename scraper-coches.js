@@ -49,8 +49,9 @@ async function exhaustiveScroll(page) {
     });
     
     // Esperar a que se carguen elementos adicionales
-    await sleep(2000);
-    
+    //await sleep(2000);
+    await sleep(8000);
+
     console.log('Realizando un segundo scroll para cargar elementos rezagados...');
     
     // Segundo enfoque: scroll más lento para asegurar que se carguen todos los elementos
@@ -77,7 +78,8 @@ async function exhaustiveScroll(page) {
     });
     
     // Esperar para asegurar que la carga de AJAX termine
-    await sleep(2000);
+    //await sleep(2000);
+    await sleep(8000);
     
     // Tercer enfoque: click en "mostrar más" o botones de paginación si existen
     try {
@@ -110,7 +112,9 @@ async function exhaustiveScroll(page) {
           
           // Hacer clic en el botón
           await page.click(selector);
-          await sleep(3000); // Esperar a que carguen más elementos
+          // Esperar a que carguen más elementos
+          //await sleep(3000);
+          await sleep(6000);
           
           // Contar cuántos elementos tenemos después de hacer clic
           const countAfter = await page.evaluate((articleSelector) => {
@@ -260,7 +264,8 @@ async function handleCookiesConsent(page) {
           console.log(`Encontrado botón por texto: "${text}"`);
           await button.click({ delay: 100 });
           console.log('Cookies aceptadas por texto.');
-          await sleep(1000);
+          //await sleep(1000);
+          await sleep(4000);
           return true;
         }
       }
@@ -401,6 +406,7 @@ async function extractData(page) {
 }
 
 // Función principal de scraping para coches.net
+// Modificaciones en la función principal de scraping para coches.net
 async function scrapeCoches(urlToScrape) {
   console.log(`Scraping URL: ${urlToScrape}`);
   
@@ -413,22 +419,26 @@ async function scrapeCoches(urlToScrape) {
         console.log(`\n=== Intento ${attempt} de ${maxRetries} ===\n`);
       }
       
-      // Lanzar navegador con configuración mejorada
+      // CAMBIO 1: Configuración mejorada del navegador con soporte WebGL
       const launchOptions = {
         headless: false,
         args: [
           '--no-sandbox',
           '--disable-setuid-sandbox',
-          '--disable-gpu',
           '--disable-dev-shm-usage',
-          '--disable-accelerated-2d-canvas',
+          // NUEVO: Habilitamos WebGL y SwiftShader para mejor renderizado
+          '--enable-webgl',
+          '--enable-unsafe-webgl',
+          '--enable-unsafe-swiftshader',
+          '--ignore-gpu-blocklist',
+          // Mantenemos el resto de las opciones
           '--no-first-run',
           '--no-zygote',
           '--disable-features=IsolateOrigins,site-per-process,SitePerProcess',
           '--disable-site-isolation-trials',
           '--disable-web-security',
           '--disable-features=BlockInsecurePrivateNetworkRequests',
-          '--window-size=1920,1080' // Pantalla más grande para ver más elementos
+          '--window-size=1920,1080'
         ],
         ignoreHTTPSErrors: true,
         defaultViewport: null // Usar el tamaño de la ventana
@@ -466,24 +476,38 @@ async function scrapeCoches(urlToScrape) {
         expires: Math.floor(Date.now() / 1000) + 86400
       });
       
-      // Configurar interceptación de peticiones para bloquear recursos innecesarios
+      // CAMBIO 2: Modificar la interceptación de peticiones para permitir recursos necesarios
       await page.setRequestInterception(true);
       
       page.on('request', (request) => {
         const url = request.url();
         const resourceType = request.resourceType();
         
-        // Bloquear recursos que no son necesarios para la extracción
+        // NUEVO: Lista de dominios permitidos relacionados con coches.net
+        const allowedDomains = [
+          'coches.net',
+          'ccdn.es',        // Dominio de imágenes y recursos de coches.net
+          'hcaptcha.com',   // Dominio del captcha
+          'googleapis.com', // Posibles fuentes
+          'gstatic.com',    // Recursos de Google
+          'adevinta.com'    // Empresa propietaria de coches.net
+        ];
+        
+        // NUEVO: Verificar si la URL contiene alguno de los dominios permitidos
+        const isAllowedDomain = allowedDomains.some(domain => url.includes(domain));
+        
+        // Solo bloquear recursos no esenciales y permitir todos los recursos de dominios confiables
         if (
-          (resourceType === 'image' && !url.includes('coches.net')) || 
-          resourceType === 'media' ||
-          url.includes('google-analytics') ||
-          url.includes('facebook.net') ||
-          url.includes('doubleclick.net') ||
-          url.includes('amazon-adsystem') ||
-          url.includes('/ads/') ||
-          url.includes('analytics') ||
-          url.includes('tracker')
+          (!isAllowedDomain && (
+            resourceType === 'media' ||
+            url.includes('google-analytics') ||
+            url.includes('facebook.net') ||
+            url.includes('doubleclick.net') ||
+            url.includes('amazon-adsystem') ||
+            url.includes('/ads/') ||
+            url.includes('analytics') ||
+            url.includes('tracker')
+          ))
         ) {
           request.abort();
         } else {
@@ -496,21 +520,33 @@ async function scrapeCoches(urlToScrape) {
       
       await page.goto(urlToScrape, { 
         waitUntil: 'networkidle2',
-        timeout: 60000 
+        //timeout: 60000 
+        timeout: 80000 
       });
       
       console.log('Página cargada.');
       
-      // Manejar cookies
+      // NUEVO: Verificar si los estilos se cargaron correctamente
+      const stylesLoaded = await page.evaluate(() => {
+        // Verificar si los elementos tienen estilos aplicados correctamente
+        const hasStyles = window.getComputedStyle(document.body).backgroundColor !== '';
+        const logoVisible = document.querySelector('.sui-TopbarUser-brand') && 
+                           window.getComputedStyle(document.querySelector('.sui-TopbarUser-brand')).backgroundImage !== '';
+        return { hasStyles, logoVisible };
+      });
+      
+      console.log('Estado de carga de estilos:', stylesLoaded);
+      
+      // Tomar screenshot para verificar visualmente
+      await page.screenshot({ path: 'page_loaded.png' });
+      
+      // Resto del código sin cambios...
       await handleCookiesConsent(page);
+      //await sleep(2000);
+      await sleep(5000);
       
-      // Esperar un tiempo antes de continuar
-      await sleep(2000);
-      
-      // Verificar si hay captcha
+      // Verificar si hay captcha...
       console.log('Comprobando si hay captcha...');
-      
-      // Intentar resolver captcha si existe
       const captchaResolved = await solveCaptcha(page);
       
       if (captchaResolved) {
@@ -519,33 +555,23 @@ async function scrapeCoches(urlToScrape) {
         console.log('No se encontró captcha o no se pudo resolver.');
       }
       
-      // Esperar un poco más después del captcha
-      await sleep(2000);
-      
-      // Contar elementos antes del scroll
+      // Resto del código de scraping sin cambios...
+      //await sleep(2000);
+      await sleep(5000);
       console.log('Contando elementos antes del scroll:');
       const initialCount = await countVisibleElements(page);
-      
-      // Realizar auto-scroll exhaustivo para cargar TODOS los elementos
       await exhaustiveScroll(page);
-      
-      // Contar elementos después del scroll
       console.log('Contando elementos después del scroll:');
       const finalCount = await countVisibleElements(page);
-      
       console.log(`Incremento de elementos: ${finalCount - initialCount} (${initialCount} -> ${finalCount})`);
-      
-      // Esperar un poco después del auto-scroll
-      await sleep(3000);
-      
-      // Extraer los datos de manera exhaustiva para coches.net
+      //await sleep(3000);
+      await sleep(6000);
       const scrapedData = await extractData(page);
       
       // Verificar si hubo error en la extracción
       if (scrapedData && scrapedData.error) {
         console.log(`Error en la extracción: ${scrapedData.error}`);
         
-        // Si estamos en el último intento, devolver lo que tengamos
         if (attempt === maxRetries) {
           console.log('Se alcanzó el número máximo de intentos.');
           await browser.close();
@@ -557,17 +583,14 @@ async function scrapeCoches(urlToScrape) {
           };
         }
         
-        // Si no es el último intento, cerrar y reintentar
         console.log('Preparando para reintentar...');
         await browser.close();
         browser = null;
         continue;
       }
       
-      // Si llegamos aquí, la extracción fue exitosa
       console.log(`Extracción completada. Se extrajeron ${Array.isArray(scrapedData) ? scrapedData.length : 0} artículos.`);
       
-      // Cerrar navegador y devolver datos
       await browser.close();
       browser = null;
       return Array.isArray(scrapedData) ? scrapedData : [];
@@ -575,19 +598,16 @@ async function scrapeCoches(urlToScrape) {
     } catch (error) {
       console.error(`Error en scraping (intento ${attempt + 1}/${maxRetries + 1}):`, error.message);
       
-      // Cerrar el navegador si sigue abierto
       if (browser) {
         await browser.close();
         browser = null;
       }
       
-      // Si es el último intento, lanzar el error
       if (attempt === maxRetries) {
         throw new Error(`Error después de ${maxRetries + 1} intentos: ${error.message}`);
       }
       
-      // Esperar antes de reintentar
-      const retryDelay = (attempt + 1) * 5000; // Incrementar tiempo entre reintentos
+      const retryDelay = (attempt + 1) * 5000;
       console.log(`Esperando ${retryDelay/1000} segundos antes de reintentar...`);
       await sleep(retryDelay);
     }
