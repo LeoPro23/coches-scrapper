@@ -16,7 +16,9 @@
     "pixelmatch": "^4.0.2",
     "puppeteer": "^24.3.1",
     "puppeteer-extra": "^3.3.6",
-    "puppeteer-extra-plugin-stealth": "^2.11.2"
+    "puppeteer-extra-plugin-stealth": "^2.11.2",
+    "puppeteer-extra-plugin-recaptcha": "^3.6.8",
+    "puppeteer-extra-plugin-anonymize-ua": "^2.4.6"
   },
   "devDependencies": {
     "nodemon": "^3.0.3"
